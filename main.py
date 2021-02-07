@@ -2,6 +2,8 @@ from pytube import YouTube
 import PyQt5.QtWidgets as qtw 
 import PyQt5.QtGui as qtg
 import ffmpeg, time
+import moviepy.editor as mpe
+import os
 
 
 class MainWindow(qtw.QWidget):
@@ -91,15 +93,16 @@ class MainWindow(qtw.QWidget):
                     yt.streams.first().download('./Downloads', filename="video")
                     yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
 
-                time.sleep(10)
+                time.sleep(2)
 
-                input_video = ffmpeg.input("./Downloads/video.mp4")
-                added_audio = ffmpeg.input("./Downloads/audio.mp4").audio.filter('adelay', "1500|1500")
-                merged_audio = ffmpeg.filter([input_video.audio, added_audio], 'amix')
-                (ffmpeg
-                .concat(input_video, merged_audio, v=1, a=1)
-                .output("Downloads/" + yt.title + ".mp4")
-                .run(overwrite_output=True))
+                def combine_audio(vidname, audname, outname, fps=25):
+                    my_clip = mpe.VideoFileClip(vidname)
+                    audio_background = mpe.AudioFileClip(audname)
+                    final_clip = my_clip.set_audio(audio_background)
+                    final_clip.write_videofile(outname,fps=fps)
+                
+                combine_audio("./Downloads/video.mp4", "./Downloads/audio.mp4","./Downloads/" yt.title + ".mp4")
+
 
                 
                 
