@@ -3,7 +3,7 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtGui as qtg
 import ffmpeg, time
 import moviepy.editor as mpe
-import os
+import os, os.path
 
 
 class MainWindow(qtw.QWidget):
@@ -61,9 +61,11 @@ class MainWindow(qtw.QWidget):
             if url.find("youtube.com") != -1:
 
                 #clear entry
-                my_entry.setText('Downloading...')
+                
+                
 
                 #Do pytube stuff
+                my_entry.setText('Downloading...')
                 print(url)
                 print(quality)
                 yt = YouTube(url)
@@ -85,6 +87,8 @@ class MainWindow(qtw.QWidget):
                 print(vId)
                 print(aId)
                 
+                print(yt.streams.get_by_itag(vId).filesize)
+
                 
                 if(afound and vfound):
                     yt.streams.get_by_itag(vId).download('./Downloads',filename="video")
@@ -93,7 +97,6 @@ class MainWindow(qtw.QWidget):
                     yt.streams.first().download('./Downloads', filename="video")
                     yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
 
-                time.sleep(2)
 
                 def combine_audio(vidname, audname, outname, fps=25):
                     my_clip = mpe.VideoFileClip(vidname)
@@ -101,11 +104,13 @@ class MainWindow(qtw.QWidget):
                     final_clip = my_clip.set_audio(audio_background)
                     final_clip.write_videofile(outname,fps=fps)
                 
-                combine_audio("./Downloads/video.mp4", "./Downloads/audio.mp4","./Downloads/" yt.title + ".mp4")
+                combine_audio("./Downloads/video.mp4", "./Downloads/audio.mp4","./Downloads/" + yt.title + ".mp4")
 
+                os.remove("./Downloads/video.mp4")
+                os.remove("./Downloads/audio.mp4")
 
-                
-                
+                my_entry.setText('Download finished')
+
             else:
                 my_entry.setText("Please give a valid YouTube link")
 
