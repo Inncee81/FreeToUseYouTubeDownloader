@@ -4,6 +4,7 @@ import PyQt5.QtGui as qtg
 import ffmpeg, time
 import moviepy.editor as mpe
 import os, os.path
+from notification import notif_download_started
 
 
 class MainWindow(qtw.QWidget):
@@ -83,7 +84,6 @@ class MainWindow(qtw.QWidget):
                     afound = True
                     print("Audio has been found")
 
-                
                 print(vId)
                 print(aId)
                 
@@ -91,6 +91,7 @@ class MainWindow(qtw.QWidget):
 
                 
                 if(afound and vfound):
+                    notif_download_started()
                     yt.streams.get_by_itag(vId).download('./Downloads',filename="video")
                     yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
                 else:
