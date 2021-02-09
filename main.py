@@ -4,7 +4,7 @@ import PyQt5.QtGui as qtg
 import ffmpeg, time
 import moviepy.editor as mpe
 import os, os.path
-from notification import notif_download_started
+from notification import notif_download_started, notif_download_finished
 
 
 class MainWindow(qtw.QWidget):
@@ -109,8 +109,7 @@ class MainWindow(qtw.QWidget):
 
                 os.remove("./Downloads/video.mp4")
                 os.remove("./Downloads/audio.mp4")
-
-                my_entry.setText('Download finished')
+                notif_download_finished()
 
             else:
                 my_entry.setText("Please give a valid YouTube link")
