@@ -40,6 +40,12 @@ class MainWindow(qtw.QWidget):
         my_combo.addItem("1080p", "1080p")
         self.layout().addWidget(my_combo)
 
+         #Create a combo box
+        mp3_or_mp4 = qtw.QComboBox(self)
+        mp3_or_mp4.addItem("mp4", "mp4")
+        mp3_or_mp4.addItem("mp3", "mp3")
+        self.layout().addWidget(mp3_or_mp4)
+
         #Create a button
         my_button = qtw.QPushButton("Download",
         clicked = lambda: press_it())
@@ -72,6 +78,7 @@ class MainWindow(qtw.QWidget):
                 yt = YouTube(url)
                 print(yt.title)
 
+
                 videoVersions = yt.streams.filter(adaptive=True, mime_type="video/mp4")
                 for version in videoVersions:
                     if version.resolution == quality:
@@ -88,29 +95,32 @@ class MainWindow(qtw.QWidget):
                 print(aId)
                 
                 print(yt.streams.get_by_itag(vId).filesize)
+                notif_download_started()
+                if mp3_or_mp4.currentText == "mp4" :
 
+                    if(afound and vfound):
+                        yt.streams.get_by_itag(vId).download('./Downloads',filename="video")
+                        yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
+                    else:
+                        yt.streams.first().download('./Downloads', filename="video")
+                        yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
+
+
+                    def combine_audio(vidname, audname, outname, fps=25):
+                        my_clip = mpe.VideoFileClip(vidname)
+                        audio_background = mpe.AudioFileClip(audname)
+                        final_clip = my_clip.set_audio(audio_background)
+                        final_clip.write_videofile(outname,fps=fps)
+                    
+                    combine_audio("./Downloads/video.mp4", "./Downloads/audio.mp4","./Downloads/" + yt.title + ".mp4")
+
+                    os.remove("./Downloads/video.mp4")
+                    os.remove("./Downloads/audio.mp4")
+                    
                 
-                if(afound and vfound):
-                    notif_download_started()
-                    yt.streams.get_by_itag(vId).download('./Downloads',filename="video")
-                    yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
                 else:
-                    yt.streams.first().download('./Downloads', filename="video")
-                    yt.streams.get_by_itag(aId).download('./Downloads',filename="audio")
-
-
-                def combine_audio(vidname, audname, outname, fps=25):
-                    my_clip = mpe.VideoFileClip(vidname)
-                    audio_background = mpe.AudioFileClip(audname)
-                    final_clip = my_clip.set_audio(audio_background)
-                    final_clip.write_videofile(outname,fps=fps)
-                
-                combine_audio("./Downloads/video.mp4", "./Downloads/audio.mp4","./Downloads/" + yt.title + ".mp4")
-
-                os.remove("./Downloads/video.mp4")
-                os.remove("./Downloads/audio.mp4")
+                    yt.streams.get_by_itag(aId).download("./Downloads/")
                 notif_download_finished()
-
             else:
                 my_entry.setText("Please give a valid YouTube link")
 
